@@ -1,17 +1,17 @@
 # NCERT Data RAG Chatbot
 
-* This is built using langchain. 
-* It uses gemini api for both ecoding and encoding and chroma for vector db.
+* This is built using langchain for genAi, fastapi for backend and streamlit for frontend. 
+* It uses gemini api for both decoding as well as encoding and chroma for vector db.
 * It supports three types of queries:
     * Simple queries that are not related to NCERT database:
         * For this classification method is used. 
         * First an embdding space is created of all the document chunks and are stored as numpy array.
-        * The during initialization of chatbot, this numpy array is loaded.
+        * Then during initialization of chatbot, this numpy array is loaded.
         * And every query is checked if it belongs in the embedding cluster using ecludian distance between the query embedding and centroid of embedding cluster.
-    * For Queries related to NCERT database we define two tools, first being calling rag workflow.
+    * For Queries related to NCERT database we define two tools, first calling the rag workflow.
         * This queries the database using query embedding and generates the answer.
     * Second get metadata workflow.
-        * This queries the database similar to above but returns the metadata like document name and page number of the matching query.
+        * This queries the database similar to above but returns the metadata like document names and page numbers of the matching query.
 
 ## Setup
 
