@@ -30,7 +30,7 @@
 
 ## Demo
 
-![](resources/Screen%20Recording%202024-10-17%20035359.mp4)
+![](resources/Screen%20Recording%202024-10-17%20035359.gif)
 
 ### Things to add
 * History
