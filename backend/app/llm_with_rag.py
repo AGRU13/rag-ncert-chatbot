@@ -9,14 +9,25 @@ from langchain_chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain import hub
-
+from langchain_core.tools import tool
 dotenv.load_dotenv()
 _DB_PATH = os.getenv('DB_PATH')
 
 logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.DEBUG)
 
-async def retreive_using_rag(query_text: str):
+@tool
+async def retreive_using_rag(query_text: str) -> str:
+    '''
+    Retrieves the most relevant documents from the vector database and uses them to answer the query.
+
+    Args:
+        query_text (str): The query text to search for in the vector database.
+
+    Returns:
+        str: The answer to the query.
+    '''
+
     retriever = _get_vector_store().as_retriever()
     prompt = hub.pull("rlm/rag-prompt")
     
@@ -42,6 +53,7 @@ def _get_chat_llm():
     )
 
 def _format_docs(docs):
+    # print([doc.metadata for doc in docs])
     return "\n\n".join(doc.page_content for doc in docs)
 
 def _parse_arg() -> str:

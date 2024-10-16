@@ -4,22 +4,41 @@ import dotenv
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.messages import HumanMessage
+
 from llm_with_rag import retreive_using_rag
 from classifier import detect_outlier
+from get_metadata import get_metadata
 
 dotenv.load_dotenv()
+
+tools = [get_metadata, retreive_using_rag]
 
 async def retrieve_using_smart_agent(query_text: str) -> str:
     is_outlier = await detect_outlier(query_text)
     llm = _get_chat_llm()
+    llm_with_tools = llm.bind_tools(tools)
 
     if is_outlier:
         print("Outlier detected, using LLM")
-        rag_chain = llm | StrOutputParser()
-        return await rag_chain.ainvoke(query_text)
+        chain = llm | StrOutputParser()
+        return await chain.ainvoke(query_text)
     else:
         print("Outlier not detected, using RAG")
-        return await retreive_using_rag(query_text)
+
+        messages = [HumanMessage(query_text)]
+        ai_msg = await llm_with_tools.ainvoke(messages)
+        print("tool_calls: ", ai_msg.tool_calls)
+        messages.append(ai_msg)
+
+        for tool_call in ai_msg.tool_calls:
+            tool_name = {"get_metadata": get_metadata, "retreive_using_rag": retreive_using_rag}[tool_call['name'].lower()]
+            tool_call_msg = await tool_name.ainvoke(tool_call)
+            messages.append(tool_call_msg)
+
+        chain = llm_with_tools | StrOutputParser()
+        return await chain.ainvoke(messages)
+                
 
 def _get_chat_llm():
     return ChatGoogleGenerativeAI(
